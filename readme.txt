@@ -22,11 +22,11 @@ Details about the command line options(to be completed...):
 	
     4. Meteor Shower
         What is this:
-            This command will automatically draw white stars on the pink/blue zones.
+            This command will automatically draw white stars on pink.
         How to use:
-            Please use this command only when your computer is idle, and have enough ink(>3000).
-            i) Zoom in to a zone contaminated by pink or blue, and set your pen size between 2-6.
-            ii) Press any key to start.
+            Please use this command only when your computer is idle, and has enough ink(>3000).
+            i) Zoom in to a place contaminated by pink, and set your pen size between 2-6.
+            ii) Press enter to start.
 	
     5. Exit
 	
