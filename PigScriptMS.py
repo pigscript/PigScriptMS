@@ -628,111 +628,98 @@ class paint:
 
 	def autoplot(self,mode=1):
 		a,b = self.center_x, self.center_y
-		target = [(250,250,250),(250,0,215),(50,240,30),(10,10,250)]
+		target = [(250,15,225)]
 		if mode>0:
 			self.mouse.move(1,100)
-			time.sleep(1)
+			time.sleep(2)
 			im=grab()
 			bad_count=0
-			pix=[[0 for i in range(100)]for j in range(100)]
-			ave_x,ave_y,tot=0,0,0
-			for j in range(100):
-				for i in range(100):
-					x=a-200+i*4
-					y=b-200+j*4
+			pix=[[0 for i in range(14)]for j in range(14)]
+			tot=0
+			for j in range(210):
+				for i in range(210):
+					x=a-210+i*2
+					y=b-210+j*2
 					r0,g0,b0 = im.getpixel((x,y))
 					for colors in target:
 						r1,g1,b1=colors
-						if max(abs(r0-r1),abs(g0-g1),abs(b0-b1))<50:
-							pix[j][i]=1
-							ave_x+=x
-							ave_y+=y
+						if max(abs(r0-r1),abs(g0-g1),abs(b0-b1))<40:
+							pix[j//15][i//15]=1
 							tot+=1
 							break
-			if tot<1000:
-				return
-			ave_x=int(ave_x/tot)
-			ave_y=int(ave_y/tot)
-			for radius in range(30,200):
-				if ave_x+radius>a+200 or ave_x-radius<a-200 or ave_y+radius>b+200 or ave_y-radius<b-200:
-					break
-				good_count=0
-				for len in range(8*radius):
-					ind=len//radius
-					length=len%(2*radius)
-					if ind==0 or ind==1:
-						x = ave_x-radius+length
-						y = ave_y-radius
-					elif ind==2 or ind==3:
-						x = ave_x+radius
-						y = ave_y-radius+length
-					elif ind==4 or ind==5:
-						x = ave_x+radius-length
-						y = ave_y+radius
-					else:
-						x = ave_x-radius
-						y = ave_y+radius-length
-					r0,g0,b0 = im.getpixel((x,y))
-					for colors in target:
-						r1,g1,b1=colors
-						if max(abs(r0-r1),abs(g0-g1),abs(b0-b1))<50:
-							good_count+=1
+			if tot<4000:
+				return 0
+			find_square=0
+			for size in range(13,4,-1):
+				for y in range(14-size):
+					for x in range(14-size):
+						gridcount=sum([sum(pix[y+k][x:x+size]) for k in range(size)])
+						if gridcount==size*size:
+							find_square=1
+							cx = a-210+15*(2*x+size+1)
+							cy = b-210+15*(2*y+size+1)
+							radius = 15*size - 15
 							break
-				if good_count/(8*radius)<0.7:
-					bad_count+=1
-					if bad_count>=7:
+					if find_square==1:
 						break
-				else:
-					bad_count=0
-			if radius<50:
-				return
-			radius-=25
+				if find_square==1:
+					break
+			if find_square==0:
+				return 0
 		n=random.randint(4,8)
 		theta=random.randint(0,360)
-		if mode==-1:
-			ave_x,ave_y,radius=a,b,200
+		if mode<0:
+			cx,cy,radius=a,b,-mode
+		if mode==0:
+			self.setcolor(random.randint(0,255),random.randint(0,255),random.randint(0,255))
 		for i in range(2*n+1):
 			angle=math.pi*theta/180
-			x0=ave_x+int(radius*math.cos(angle))
-			y0=ave_y+int(radius*math.sin(angle))
+			x0=cx+int(radius*math.cos(angle))
+			y0=cy+int(radius*math.sin(angle))
 			theta+=360*n/(2*n+1)
 			angle=math.pi*theta/180
-			x1=ave_x+int(radius*math.cos(angle))
-			y1=ave_y+int(radius*math.sin(angle))
+			x1=cx+int(radius*math.cos(angle))
+			y1=cy+int(radius*math.sin(angle))
 			self.drawline(x0,y0,x1,y1)
+		return 1
 						
-	def MeteorShower(self,num=15):
+	def MeteorShower(self,num=30):
 		h_c=0
 		v_c=0
-		print('Please enable full screen in your brower and zoom in to an area contaminated by pink or by blue')
+		print('Please enable full screen in your brower and zoom in to an area contaminated by pink')
 		print('Press enter when you are ready.')
 		c=input()
+		if c!='m':
+			self.setcolor(255,255,255)
 		if c=='q':
 			while True:
-				pen.autoplot(mode=-1)
 				c=input()
 				if c=='e':
 					break
-		self.setcolor(255,255,255)
+				try:
+					n=int(c)
+				except:
+					n=200
+				pen.autoplot(mode=-n)
+		bad=0
 		while True:
 			h_c+=1
-			pen.autoplot()
+			a=pen.autoplot()
+			if a==0:
+				bad+=1
+			else:
+				bad=0
 			time.sleep(1)
-			if h_c == num:
+			if h_c == num or bad==5:
+				bad=-1
 				h_c=0
 				v_c+=1
-				pen.shift('down',0.7)
-				time.sleep(1)
-				pen.shift('down',0.7)
+				pen.shift('down',1.2)
 			elif v_c%2 == 0:
-				pen.shift('right',0.7)
-				time.sleep(1)
-				pen.shift('right',0.7)
+				pen.shift('right',1)
 			else:
-				pen.shift('left',0.7)
-				time.sleep(1)
-				pen.shift('left',0.7)
-			time.sleep(2)
+				pen.shift('left',1)
+			time.sleep(1)
 
 #main
 m=PyMouse()
@@ -752,7 +739,7 @@ while True:
 		system('cls')
 		break
 	elif source==4:
-		pen.MeteorShower(-1)
+		pen.MeteorShower()
 	elif source==3:
 		pen.plotcurve()
 		continue
